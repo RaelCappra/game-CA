@@ -2,7 +2,7 @@
 	"player": {
 		"life": 25,
 		"shot": "1",
-		"shot_speed": 4,
+		"shot_speed": 15,
 		"damage": 4	
 	},
 	"monster1": {

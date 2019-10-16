@@ -14,15 +14,18 @@ class GameObject(pygame.sprite.Sprite):
         self.rect.x = position[0]
         self.rect.y = position[1]
 
+    # TODO: avoid hardcoding bounds like that
     def touchingRightBorder(self):
-        if(self.rect.right >= 640):
-            return True
-        return False
+        return self.rect.right >= 640
 
     def touchingLeftBorder(self):    
-        if(self.rect.left <= 0):
-            return True
-        return False
+        return self.rect.left <= 0
+
+    def touchingLowerBorder(self):
+        return self.rect.bottom >= 480
+
+    def touchingUpperBorder(self):    
+        return self.rect.top <= 0
 
     def getPosition(self):
         return (self.rect.x, self.rect.y)
@@ -32,6 +35,28 @@ class GameObject(pygame.sprite.Sprite):
 
     def move(self):
         GameObject.setPosition(self, (self.rect.x + self.speed[0], self.rect.y + self.speed[1]))
+
+class BulletPattern():
+    def __init__(self):
+        pass
+    def get_velocity(self):
+        return (0, 0)
+
+# TODO: bullet patterns (maybe much later)
+class LinearBulletPattern(BulletPattern):
+    def __init__(self, v):
+        super().__init__()
+        self.velocity = v
+    def get_velocity(self):
+        return self.velocity
+
+class ChasingBulletPattern(BulletPattern):
+    def __init__(self, player_entity):
+        super().__init__()
+        self.velocity = (0, 0)
+    def get_velocity(self):
+        return self.velocity
+
 
 class Shot(GameObject):
     def __init__(self, key, position, direction, speed, damage = 1):
@@ -55,6 +80,7 @@ class Entity(GameObject):
         GameObject.__init__(self, key, 'entities', position)
         self.abs_speed = speed
         self.speed = (0, 0)
+        self.direction = (0, 0)
         self.life = life
         self.shots = Group()
         self.damage = damage
@@ -64,7 +90,24 @@ class Entity(GameObject):
 
     def setSpeed(self, direction):
         self.speed = (direction[0] * self.abs_speed, direction[1] * self.abs_speed)
- 
+
+    def attemptMove(self, direction):
+        final_direction = list(direction)
+        if direction[0] > 0 and self.touchingRightBorder():
+            final_direction[0] = 0
+        elif direction[0] < 0 and self.touchingLeftBorder():
+            final_direction[0] = 0
+
+        if direction[1] > 0 and self.touchingLowerBorder():
+            final_direction[1] = 0
+        elif direction[1] < 0 and self.touchingUpperBorder():
+            final_direction[1] = 0
+         
+        if final_direction[0] and final_direction[1]: #compensate for diagonal speed
+            final_direction[0] /= 2**.5
+            final_direction[1] /= 2**.5
+        self.setSpeed(final_direction)
+
     def shoot(self):
         temp_image = pygame.image.load('data/shots/{}.png'.format(self.shot_key)).convert_alpha()
         position = (self.rect.x + self.rect.width/2 - temp_image.get_rect().width/2, self.rect.y)
@@ -92,7 +135,7 @@ class Entity(GameObject):
             shot.do()
 
 class Player(Entity):
-    def __init__(self, key, position, shot_key = '1', shot_speed = 4, life = 10, damage = 4, speed = 3, score = 0, attack_interval=500):
+    def __init__(self, key, position, shot_key='1', shot_speed=15, life=10, damage=1, speed=4, score=0, attack_interval=80):
         Entity.__init__(self, key, position, shot_key, shot_speed, life, damage, speed)
         self.score = score
         self.shot_direction = (0, -1)

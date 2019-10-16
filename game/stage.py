@@ -89,23 +89,26 @@ class Stage:
         lastMove = "right"
 
         while not self.done:
-
-                #Keyboard press and exit events
+            #Keyboard press and exit events
             for event in pygame.event.get():
                 if event.type == QUIT:
                     exit()
 
             #Keyboard hold
             keys = pygame.key.get_pressed()    
-            if keys[K_LEFT] or keys[K_a]:
-                if not self.player.touchingLeftBorder():
-                    self.player.setSpeed((-1, 0))
-            if keys[K_RIGHT] or keys[K_d]:
-                if not self.player.touchingRightBorder():
-                    self.player.setSpeed((1, 0))
+            dir_vector = [0, 0]
+            if keys[K_LEFT]:
+                dir_vector[0] = -1
+            if keys[K_RIGHT]:
+                dir_vector[0] = 1
+            if keys[K_UP]:
+                dir_vector[1] = -1
+            if keys[K_DOWN]:
+                dir_vector[1] = 1
             if keys[K_z]:
                 if self.player.attempt_shoot(self.CLOCK):
                     playSoundPlayerShot()
+            self.player.attemptMove(dir_vector)
             self.player.do()
 
             #Checking if monsters can be moved
