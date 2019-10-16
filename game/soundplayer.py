@@ -10,7 +10,7 @@ def playSoundDeath():
 def playBackgroundMusic():
     pygame.mixer.music.load("data/sound/bgMusic.ogg")
     pygame.mixer.music.play(-1)
-    pygame.mixer.music.set_volume(0.1)
+    pygame.mixer.music.set_volume(0.0)
 
 def playSoundPlayerShot():
     tempEffect = pygame.mixer.Sound("data/sound/playerShot.wav")

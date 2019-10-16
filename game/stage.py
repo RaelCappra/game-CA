@@ -8,7 +8,7 @@ from game.soundplayer import *
 from game import *
 import json
 
-MAX_STAGE = 10
+MAX_STAGE = 1 # 10
 MONSTERS_SPEED = 2
 
 class Stage:
@@ -40,16 +40,16 @@ class Stage:
         conf = entities_config['player']
 
         #gambiarra
-        if self.player == None:
+        if self.player is None:
             self.player = Player('player', tuple(config['player_position']),
-            conf['shot'], conf['shot_speed'], conf['life'], conf['damage'])
+                                 conf['shot'], conf['shot_speed'], conf['life'], conf['damage'])
         else:
             self.player.shots = Group()
 
-        if self.health_bar == None:
+        if self.health_bar is None:
             self.health_bar = HealthBar(self.player)
         #fim gambiarra
-     
+
         #botando os monstros a partir do y = 0
         y = 0
         for i in range(1, 5):
@@ -57,9 +57,10 @@ class Stage:
             x = config['monsters_position'][0]
             y_M = 0
             for c in line:
-                conf = entities_config['monster' + c] 
+                conf = entities_config['monster' + c]
                 self.monsters.add(Monster('monster' + c, (x, y), conf['shot'],
-                conf['shot_speed'], conf['life'], conf['damage'], conf['value'], MONSTERS_SPEED))
+                                          conf['shot_speed'], conf['life'],
+                                          conf['damage'], conf['value'], MONSTERS_SPEED))
                 x += conf['size'][0]
                 if conf['size'][1] > y_M:
                     y_M = conf['size'][1]
@@ -74,7 +75,7 @@ class Stage:
         while True:
             if yMovToPos < (y + config['monsters_position'][1])/MONSTERS_SPEED:
                 for monster in self.monsters:
-                    monster.setSpeed((0,1))
+                    monster.setSpeed((0, 1))
                     monster.do()
                 yMovToPos += 1
             else:
@@ -88,7 +89,7 @@ class Stage:
         lastMove = "right"
 
         while not self.done:
-                
+
                 #Keyboard press and exit events
             for event in pygame.event.get():
                 if event.type == QUIT:
@@ -97,13 +98,13 @@ class Stage:
             #Keyboard hold
             keys = pygame.key.get_pressed()    
             if keys[K_LEFT] or keys[K_a]:
-                if(not self.player.touchingLeftBorder()):
+                if not self.player.touchingLeftBorder():
                     self.player.setSpeed((-1, 0))
             if keys[K_RIGHT] or keys[K_d]:
-                if(not self.player.touchingRightBorder()):
+                if not self.player.touchingRightBorder():
                     self.player.setSpeed((1, 0))
-            if keys[K_SPACE]:
-                if(self.player.attempt_shoot(self.CLOCK)):
+            if keys[K_z]:
+                if self.player.attempt_shoot(self.CLOCK):
                     playSoundPlayerShot()
             self.player.do()
 
@@ -118,11 +119,11 @@ class Stage:
                     canMoveRight = False
 
             if(canMoveRight and lastMove == "left"):
-                monsSpeed = (1,0)
+                monsSpeed = (1, 0)
             elif(canMoveLeft and lastMove == "right"):
-                monsSpeed = (-1,0)
+                monsSpeed = (-1, 0)
             else:
-                monsSpeed = (0,0)
+                monsSpeed = (0, 0)
 
             for monster in self.monsters:
                 monster.setSpeed(monsSpeed)
@@ -141,7 +142,7 @@ class Stage:
             #Monsters-Shots collision with player
             for monster in self.monsters:
                 collided = spritecollide(self.player, monster.shots, True)
-                if(len(collided)):
+                if len(collided):
                     self.player.life -= monster.damage
                     collision_pos = self.player.getPosition()
                     self.temp_effects.append(TempEffect("hit_blue", "effects", collision_pos))
@@ -171,8 +172,8 @@ class Stage:
 
             self.CLOCK.tick(self.FPS)
 
-        if(len(self.monsters) <= 0):
-            if(self.key < MAX_STAGE):
+        if len(self.monsters) <= 0:
+            if self.key < MAX_STAGE:
                 self.done = False
                 self.key += 1
                 self.start()
@@ -180,11 +181,11 @@ class Stage:
                 text = "You won!  Score: " + str(self.player.score)
                 self.showText(text)
                 pygame.time.delay(2000)
-        
+
 
     def showText(self, text):
         font = pygame.font.Font('freesansbold.ttf', 40)
-        textSurface = font.render(text, True, (0,0,0))
+        textSurface = font.render(text, True, (0, 0, 0))
         dest = textSurface.get_rect()
         dest.center = (320,240)
         self.screen.blit(textSurface, dest)
